@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "c14220270.paba.tasklist"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "c14220270.paba.tasklist"
