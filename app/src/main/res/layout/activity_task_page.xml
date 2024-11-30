@@ -114,4 +114,15 @@
         android:layout_marginEnd="16dp"
         android:backgroundTint="#0096FF"/>
 
+    <Button
+        android:id="@+id/backHomeBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="#D22B2B"/>
+
 </LinearLayout>
