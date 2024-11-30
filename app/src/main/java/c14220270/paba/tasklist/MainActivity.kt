@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                 taskAdapter.notifyDataSetChanged()
             }
             .addOnFailureListener{
-                Log.d("Firebase", it.message.toString() + "Error Wana")
+                Log.d("Firebase", it.message.toString())
             }
     }
 }
