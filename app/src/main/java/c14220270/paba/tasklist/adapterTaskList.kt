@@ -1,17 +1,22 @@
 package c14220270.paba.tasklist
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
 class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
     .Adapter<adapterTaskList.ListViewHolder> ()
 {
+    val db = Firebase.firestore
+
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var _namaTask = itemView.findViewById<TextView>(R.id.TaskName)
         var _deskripsiTask = itemView.findViewById<TextView>(R.id.TaskDesc)
@@ -45,6 +50,50 @@ class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
 
         holder._stateBtn.setOnClickListener{
 
+            if (task.status == "Completed"){
+                return@setOnClickListener
+            }
+            val newStatus = when (task.status) {
+                "Start" -> "Ongoing"
+                else -> "Completed"
+            }
+            AlertDialog.Builder(holder.itemView.context)
+                .setTitle("Confirm Status Change")
+                .setMessage("Are you sure you want to change the task status to $newStatus?")
+                .setPositiveButton("Yes") { dialog, _->
+                    db.collection("tasks")
+                        .whereEqualTo("name", task.name)
+                        .whereEqualTo("description", task.description)
+                        .whereEqualTo("date", task.date)
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            if (!documents.isEmpty) {
+                                // Assuming only one document matches the query
+                                val documentId = documents.documents[0].id
+                                db.collection("tasks")
+                                    .document(documentId)
+                                    .update("status", newStatus)
+                                    .addOnSuccessListener {
+                                        task.status = newStatus
+                                        notifyItemChanged(position)
+                                        Log.d("Firebase", "Status updated to $newStatus")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.d("Firebase", "Error updating document: ${e.message}")
+                                    }
+                            } else {
+                                Log.d("Firebase", "No matching document found")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("Firebase", "Error finding document: ${e.message}")
+                        }
+                }
+                .setNegativeButton("No") { dialog, _->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
         }
 
         holder._editBtn.setOnClickListener{
@@ -52,7 +101,42 @@ class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
         }
 
         holder._deleteBtn.setOnClickListener{
-
+            AlertDialog.Builder(holder.itemView.context)
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete this task ?")
+                .setPositiveButton("Yes") { dialog, _ ->
+                    db.collection("tasks")
+                        .whereEqualTo("name", task.name)
+                        .whereEqualTo("description", task.description)
+                        .whereEqualTo("date", task.date)
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            if (!documents.isEmpty) {
+                                val documentId = documents.documents[0].id
+                                db.collection("tasks")
+                                    .document(documentId)
+                                    .delete()
+                                    .addOnSuccessListener {
+                                        listTask.removeAt(position)
+                                        notifyItemRemoved(position)
+                                        notifyItemRangeChanged(position, listTask.size)
+                                        Log.d("Firebase", "Task deleted successfully")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.d("Firebase", "Error deleting document: ${e.message}")
+                                    }
+                            } else {
+                                Log.d("Firebase", "No matching document found for deletion")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("Firebase", "Error finding document: ${e.message}")
+                        }
+                }.setNegativeButton("No") {dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
         }
 
     }

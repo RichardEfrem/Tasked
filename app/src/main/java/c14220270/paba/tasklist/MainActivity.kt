@@ -45,6 +45,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        readData(db)
+    }
+
     private fun readData(db: FirebaseFirestore) {
         db.collection("tasks").get()
             .addOnSuccessListener {
