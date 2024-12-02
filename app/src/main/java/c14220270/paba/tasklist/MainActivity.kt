@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity() {
         }
         _rvTaskList = findViewById<RecyclerView>(R.id.cardTaskList)
         _rvTaskList.layoutManager = LinearLayoutManager(this)
-        taskAdapter = adapterTaskList(DataTaskList) // Pass the dataset
-        _rvTaskList.adapter = taskAdapter // Set the adapter to RecyclerView
+        taskAdapter = adapterTaskList(DataTaskList)
+        _rvTaskList.adapter = taskAdapter
 
         readData(db)
 

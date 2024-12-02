@@ -1,11 +1,13 @@
 package c14220270.paba.tasklist
 
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Firebase
@@ -97,7 +99,10 @@ class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
         }
 
         holder._editBtn.setOnClickListener{
-
+            val intent = Intent(holder.itemView.context, taskPage::class.java).apply {
+                putExtra("task", task)
+            }
+            holder.itemView.context.startActivity(intent)
         }
 
         holder._deleteBtn.setOnClickListener{
@@ -121,9 +126,11 @@ class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
                                         notifyItemRemoved(position)
                                         notifyItemRangeChanged(position, listTask.size)
                                         Log.d("Firebase", "Task deleted successfully")
+                                        Toast.makeText(holder.itemView.context, "Task Successfully Deleted", Toast.LENGTH_LONG).show()
                                     }
                                     .addOnFailureListener { e ->
                                         Log.d("Firebase", "Error deleting document: ${e.message}")
+                                        Toast.makeText(holder.itemView.context, "Task Failed to be Deleted", Toast.LENGTH_LONG).show()
                                     }
                             } else {
                                 Log.d("Firebase", "No matching document found for deletion")

@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -19,6 +20,8 @@ import java.util.Calendar
 class taskPage : AppCompatActivity() {
 
     val db = Firebase.firestore
+    private var editPage = false
+    private var originalTaskName : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,26 @@ class taskPage : AppCompatActivity() {
         val _description = findViewById<EditText>(R.id.taskViewDesc)
         val _dateText = findViewById<TextView>(R.id.taskViewDate)
         val _datePickerBtn = findViewById<Button>(R.id.datePicker)
+
+        val _addTaskButton = findViewById<Button>(R.id.AddEditTaskBtn)
+        _addTaskButton.setOnClickListener{
+            Log.d("ButtonClick", "Add Task button clicked")
+            if (editPage){
+                UpdateData(db, originalTaskName.toString(), _name.text.toString(), _description.text.toString(), _dateText.text.toString())
+            }
+            TambahData(db, _name.text.toString(), _description.text.toString(), _dateText.text.toString())
+        }
+
+        val intent = intent.getParcelableExtra("task", taskList::class.java)
+        if ( intent != null ) {
+            editPage = true
+            _addTaskButton.text = "Edit Task"
+            originalTaskName = intent.name
+
+            _name.setText(intent.name)
+            _description.setText(intent.description)
+            _dateText.setText(intent.date)
+        }
 
         _datePickerBtn.setOnClickListener{
             val c = Calendar.getInstance()
@@ -67,12 +90,6 @@ class taskPage : AppCompatActivity() {
             // to display our date picker dialog.
             datePickerDialog.show()
         }
-
-        val _addTaskButton = findViewById<Button>(R.id.AddEditTaskBtn)
-        _addTaskButton.setOnClickListener{
-            Log.d("ButtonClick", "Add Task button clicked")
-            TambahData(db, _name.text.toString(), _description.text.toString(), _dateText.text.toString())
-        }
     }
 
     private fun TambahData(db: FirebaseFirestore, Name: String, Description: String, Date: String){
@@ -85,9 +102,27 @@ class taskPage : AppCompatActivity() {
                 Log.d("Firebase", "Data Berhasil Disimpan")
                 val intent = Intent(this@taskPage,MainActivity::class.java)
                 startActivity(intent)
+                if (editPage){
+                    Toast.makeText(this@taskPage, "Task Successfully Updated", Toast.LENGTH_LONG).show()
+                }else{
+                    Toast.makeText(this@taskPage, "Task Successfully Added", Toast.LENGTH_LONG).show()
+                }
             }
             .addOnFailureListener{
                 Log.d("Firebase", it.message.toString())
+                Toast.makeText(this@taskPage, "Task Failed to be Added", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun UpdateData(db: FirebaseFirestore, originalTaskName: String, Name: String, Description: String, Date: String){
+        db.collection("tasks")
+            .document(originalTaskName)
+            .delete()
+            .addOnSuccessListener {
+                TambahData(db, Name, Description, Date)
+            }
+            .addOnFailureListener{
+                Toast.makeText(this@taskPage, "Failed to Update Task", Toast.LENGTH_LONG).show()
             }
     }
 }
