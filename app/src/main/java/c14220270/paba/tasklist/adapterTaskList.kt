@@ -1,6 +1,7 @@
 package c14220270.paba.tasklist
 
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -44,11 +45,26 @@ class adapterTaskList (private val listTask: ArrayList<taskList>) : RecyclerView
         holder._deskripsiTask.setText(task.description)
         holder._tanggalTask.setText(task.date)
 
-        holder._stateBtn.text = when (task.status) {
-            "Start" -> "Start"
-            "Ongoing" -> "Ongoing"
-            else -> "Completed"
+        when (task.status){
+            "Start" -> {
+                holder._stateBtn.text = "Start"
+                holder._stateBtn.setBackgroundColor(Color.parseColor("#0096FF"))
+            }
+            "Ongoing" -> {
+                holder._stateBtn.text = "Ongoing"
+                holder._stateBtn.setBackgroundColor(Color.parseColor("#FFC000"))
+            }
+            else -> {
+                holder._stateBtn.text = "Completed"
+                holder._stateBtn.setBackgroundColor(Color.parseColor("#50C878"))
+            }
         }
+
+//        holder._stateBtn.text = when (task.status) {
+//            "Start" -> "Start"
+//            "Ongoing" -> "Ongoing"
+//            else -> "Completed"
+//        }
 
         holder._stateBtn.setOnClickListener{
 
